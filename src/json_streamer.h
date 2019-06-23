@@ -133,5 +133,4 @@ public:
     }
 };
 
-
 #endif //JSON_STREAMER_H
