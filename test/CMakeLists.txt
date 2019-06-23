@@ -4,7 +4,7 @@
 set (Boost_USE_STATIC_LIBS OFF)
 
 
-find_package (Boost REQUIRED COMPONENTS unit_test_framework)
+find_package (Boost 1.69.0 COMPONENTS unit_test_framework filesystem)
 
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
@@ -12,7 +12,7 @@ endif()
 
 set(Sources
         ${CMAKE_CURRENT_LIST_DIR}/testmain.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/write.h)
+        ${CMAKE_CURRENT_LIST_DIR}/write.h read.h)
 
 add_executable (testapp ${Sources})
 

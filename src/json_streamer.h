@@ -9,6 +9,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/filesystem.hpp>
 #include <forward_list>
+#include <optional>
 #include <iostream>
 #include <string>
 
@@ -16,7 +17,7 @@
 #define LOG(x) {std::cout << __LINE__ << ": " << x << std::endl;}
 
 
-template <class Object, class Type = std::forward_list<std::string>, class ValueType = std::string>
+template <class Object, class ValueType, class Type = std::forward_list<std::string>>
 class JsonStreamer {
 private:
     Type _keys;
@@ -57,18 +58,34 @@ private:
         if (! exists())
             LOG("File does not exists");
 
+        std::string use_string;
+        if (strcmp(typeid(ValueType).name(),"int") == 0 || strcmp(typeid(ValueType).name(), "float") == 0 ||
+            strcmp(typeid(ValueType).name(),"double") == 0) {
+
+            std::stringstream ss;
+            ss << search_pattern;
+            use_string = ss.str();
+        }
+        else {
+            use_string = search_pattern;
+        }
         boost::property_tree::read_json(_path, root);
 
-        for (auto &it : root) {
-            auto tt = it;
-            auto val = it.second;
+        for (auto& it : root) {
+            boost::property_tree::ptree val = it.second;
+            std::stringstream ss;
+            ss << it.first;
+            ValueType key = ss.str();
             if (val.empty())
                 continue;
 
-            auto found = val.get<std::string>(_keys.front());
-            if (std::string::npos != found.find(search_pattern)) {
-                search_pattern = found;
-                return it;
+            auto readValueType = val.get<ValueType>(_keys.front());
+            std::stringstream ss2;
+            ss2 << readValueType;
+            std::string found = ss2.str();
+            if (std::string::npos != found.find(use_string)) {
+                use_string = found;
+                return {key, val};
             }
         }
         return {emptyVal, empty};
@@ -76,16 +93,19 @@ private:
 
 public:
 
-    JsonStreamer (std::string const &path, Type &keys) : _keys(keys), _path(path) {};
+    JsonStreamer (std::string &path, Type &keys) : _keys(keys), _path(path) {};
     ~JsonStreamer() = default;
 
-    Object fetch(ValueType &search_pattern) noexcept
+    std::optional<Object> fetch(ValueType &search_pattern) noexcept
     {
         Object obj;
         Object* obj_ptr;
         obj_ptr = &obj;
 
         auto item = read(search_pattern);
+        if (item.second.empty())
+            return std::nullopt;
+
         boost::property_tree::ptree tree = item.second.get_child("");
         auto key_ptr = _keys.begin();
         auto parent = tree.get<ValueType>(*key_ptr);
