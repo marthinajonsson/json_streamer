@@ -33,22 +33,23 @@ streamer.fetch(value) // value of head of json object<br>
 
 
 Exempel json file:
-
-{<br>
-    "0": {<br>
-        "head": "parent",<br>
-        "data": {<br>
-            "id": "1",<br>
-            "description": "testing",<br>
-            "value": "34"<br>
-        }<br>
-    },<br>
-     "1": {<br>
-        "head": "parent2",<br>
-        "data": {<br>
-            "id": "2",<br>
-            "description": "testing",<br>
-            "value": "9"<br>
-        }<br>
-     }<br>
+<pre><code>
+{
+    "0": {
+        "head": "parent",
+        "data": {
+            "id": "1",
+            "description": "testing",
+            "value": "34"
+        }
+    },
+     "1": {
+        "head": "parent2",
+        "data": {
+            "id": "2",
+            "description": "testing",
+            "value": "9"
+        }
+     }
 }
+</code></pre>
