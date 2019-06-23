@@ -51,44 +51,43 @@ private:
 
     std::pair<ValueType, boost::property_tree::ptree> read(ValueType& search_pattern) noexcept
     {
-        ValueType emptyVal;
+        ValueType empty_val;
+        std::string use_string;
         boost::property_tree::ptree root;
         boost::property_tree::ptree empty;
 
         if (! exists())
             LOG("File does not exists");
 
-        std::string use_string;
-        if (strcmp(typeid(ValueType).name(),"int") == 0 || strcmp(typeid(ValueType).name(), "float") == 0 ||
-            strcmp(typeid(ValueType).name(),"double") == 0) {
 
-            std::stringstream ss;
-            ss << search_pattern;
-            use_string = ss.str();
-        }
-        else {
-            use_string = search_pattern;
-        }
+        std::stringstream ss;
+        ss << search_pattern;
+        use_string = ss.str();
+
         boost::property_tree::read_json(_path, root);
 
         for (auto& it : root) {
             boost::property_tree::ptree val = it.second;
-            std::stringstream ss;
-            ss << it.first;
-            ValueType key = ss.str();
             if (val.empty())
                 continue;
 
             auto readValueType = val.get<ValueType>(_keys.front());
+
             std::stringstream ss2;
             ss2 << readValueType;
             std::string found = ss2.str();
             if (std::string::npos != found.find(use_string)) {
-                use_string = found;
+
+                std::istringstream iss (it.first);
+                ValueType key;
+                iss >> key;
+                if (iss.fail())
+                    LOG("Something might have gone wrong, check your result");
+
                 return {key, val};
             }
         }
-        return {emptyVal, empty};
+        return {empty_val, empty};
     }
 
 public:

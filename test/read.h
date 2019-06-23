@@ -13,6 +13,7 @@
 #include <boost/test/unit_test.hpp>
 #include "../src/json_streamer.h"
 #include <string>
+#include <math.h>
 
 //
 //// seven ways to detect and report the same error:
@@ -33,7 +34,7 @@
 //
 //BOOST_CHECK_EQUAL( add( 2,2 ), 4 );	  // #7 continues on error
 
-
+#define round_floor(x,d) ((floor(((x)*pow(10,d))+.5))/pow(10,d))
 
 struct R {
 
@@ -114,6 +115,59 @@ BOOST_FIXTURE_TEST_SUITE(read_tests, R)
         BOOST_CHECK_EQUAL(rsp.value().desc, 3467);
     }
 
+    BOOST_AUTO_TEST_CASE(read_first_double) {
+
+        struct Object {
+            double head;
+            double id;
+            double desc;
+            double value;
+        } obj;
+
+        obj.head = 44.1;
+        obj.id = 5;
+        obj.desc = 43.3111;
+        obj.value = 78.2;
+
+        JsonStreamer<Object, double> streamer(path, _keys);
+        streamer.write(obj);
+
+        double test_val = 23.0;
+        std::optional<Object> rsp = streamer.fetch(test_val);
+        BOOST_CHECK_NE(rsp.has_value(), true);
+
+        test_val = 44.1;
+        rsp = streamer.fetch(test_val);
+        BOOST_CHECK_EQUAL(rsp.has_value(), true);
+        BOOST_CHECK_EQUAL(round_floor(rsp.value().desc, 1), 43.3);
+    }
+
+    BOOST_AUTO_TEST_CASE(read_first_float) {
+
+        struct Object {
+            float head;
+            float id;
+            float desc;
+            float value;
+        } obj;
+
+        obj.head = 44.0;
+        obj.id = 5;
+        obj.desc = 43.1;
+        obj.value = 78.31;
+
+        JsonStreamer<Object, float> streamer(path, _keys);
+        streamer.write(obj);
+
+        float test_val = 23.0;
+        std::optional<Object> rsp = streamer.fetch(test_val);
+        BOOST_CHECK_NE(rsp.has_value(), true);
+
+        test_val = 44.0;
+        rsp = streamer.fetch(test_val);
+        BOOST_CHECK_EQUAL(rsp.has_value(), true);
+        BOOST_CHECK_EQUAL(round_floor(rsp.value().value, 2), 78.31);
+    }
 
 BOOST_AUTO_TEST_SUITE_END()
 
