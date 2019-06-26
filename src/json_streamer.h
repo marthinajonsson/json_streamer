@@ -33,7 +33,7 @@ private:
         return (std::string*)((std::string*)s+sizeof(*s));
     }
 
-    bool exists() {
+    bool file_exists() {
         if (!boost::filesystem::exists(_path)) {
             boost::property_tree::ptree empty;
             std::fstream file;
@@ -49,14 +49,14 @@ private:
         return true;
     }
 
-    std::pair<std::string, boost::property_tree::ptree> read(std::string& search_pattern) noexcept
+    std::pair<std::string, boost::property_tree::ptree> find(std::string& search_pattern) noexcept
     {
         std::string empty_val;
         std::string use_string;
         boost::property_tree::ptree root;
         boost::property_tree::ptree empty;
 
-        if (! exists())
+        if (! file_exists())
             LOG("File does not exists");
 
 
@@ -95,25 +95,44 @@ public:
     JsonStreamer (std::string &path, Type &keys) : _keys(keys), _path(path) {};
     ~JsonStreamer() = default;
 
+    void update (Object obj) noexcept
+    {
+        std::string* elem_ptr = get_begin(&obj);
+        auto key_ptr = _keys.begin();
+        key_ptr++;
+        auto item = find(*elem_ptr);
+        if (!item.second.empty()) {
+            boost::property_tree::ptree node = item.second.get_child("");
+            auto data = node.get_child("data");
+            elem_ptr++;
+
+            for (;elem_ptr < get_end(&obj) && key_ptr != _keys.end();elem_ptr++, key_ptr++) {
+                //data.put_value(.....)
+            }
+
+        }
+        return obj;
+    }
+
     std::optional<Object> fetch(std::string &search_pattern) noexcept
     {
         Object obj;
         Object* obj_ptr;
         obj_ptr = &obj;
 
-        auto item = read(search_pattern);
+        auto item = find(search_pattern);
         if (item.second.empty())
             return std::nullopt;
 
-        boost::property_tree::ptree tree = item.second.get_child("");
+        boost::property_tree::ptree node = item.second.get_child("");
         auto key_ptr = _keys.begin();
-        auto parent = tree.get<std::string>(*key_ptr);
+        std::string parent = node.get<std::string>(*key_ptr);
         std::string *elem_ptr = get_begin(obj_ptr);
         *elem_ptr = parent;
         elem_ptr++;
         key_ptr++;
 
-        auto data = tree.get_child("data");
+        auto data = node.get_child("data");
         for ( ;elem_ptr < get_end(obj_ptr) && key_ptr != _keys.end(); elem_ptr++, key_ptr++) {
             auto val = *key_ptr;
             *elem_ptr = data.get<std::string>(val);
@@ -122,13 +141,21 @@ public:
         return obj;
     }
 
+    boost::property_tree::ptree fetch_node(std::string &search_pattern) noexcept
+    {
+        auto item = find(search_pattern);
+        if (item.second.empty())
+
+        return item.second.get_child("").data();
+    }
+
     void write (Object obj) noexcept
     {
         boost::property_tree::ptree root;
         boost::property_tree::ptree parent;
         boost::property_tree::ptree child;
 
-        if (! exists())
+        if (! file_exists())
             LOG("File does not exists");
 
         boost::property_tree::read_json(_path, root);

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(json_streamer)
+project(JsonStreamer)
 
 
 set(CMAKE_CXX_STANDARD 17)
@@ -20,7 +20,7 @@ endif()
 set(Sources
         ${CMAKE_CURRENT_LIST_DIR}/src/json_streamer.h)
 
-add_library(json_streamer STATIC ${Sources})
+add_library(JsonStreamer SHARED ${Sources})
 
-set_target_properties(json_streamer PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(json_streamer ${Boost_LIBRARIES})
+set_target_properties(JsonStreamer PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries(JsonStreamer ${Boost_LIBRARIES})
