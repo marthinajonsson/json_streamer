@@ -17,20 +17,20 @@
 #define LOG(x) {std::cout << __LINE__ << ": " << x << std::endl;}
 
 
-template <class Object, class ValueType, class Type = std::forward_list<std::string>>
+template <class Object, class Type = std::forward_list<std::string>>
 class JsonStreamer {
 private:
     Type _keys;
     std::string _path;
 
-    template <typename S> ValueType* get_begin(S *s)
+    template <typename S> std::string* get_begin(S *s)
     {
-        return (ValueType*)s;
+        return (std::string*)s;
     }
 
-    template <typename S> ValueType* get_end(S *s)
+    template <typename S> std::string* get_end(S *s)
     {
-        return (ValueType*)((ValueType*)s+sizeof(*s));
+        return (std::string*)((std::string*)s+sizeof(*s));
     }
 
     bool exists() {
@@ -49,9 +49,9 @@ private:
         return true;
     }
 
-    std::pair<ValueType, boost::property_tree::ptree> read(ValueType& search_pattern) noexcept
+    std::pair<std::string, boost::property_tree::ptree> read(std::string& search_pattern) noexcept
     {
-        ValueType empty_val;
+        std::string empty_val;
         std::string use_string;
         boost::property_tree::ptree root;
         boost::property_tree::ptree empty;
@@ -71,15 +71,15 @@ private:
             if (val.empty())
                 continue;
 
-            auto readValueType = val.get<ValueType>(_keys.front());
+            auto readValueType = val.get<std::string>(_keys.front());
 
             std::stringstream ss2;
             ss2 << readValueType;
             std::string found = ss2.str();
-            if (std::string::npos != found.find(use_string)) {
-
+            if (std::string::npos != found.find(use_string))
+            {
                 std::istringstream iss (it.first);
-                ValueType key;
+                std::string key;
                 iss >> key;
                 if (iss.fail())
                     LOG("Something might have gone wrong, check your result");
@@ -95,7 +95,7 @@ public:
     JsonStreamer (std::string &path, Type &keys) : _keys(keys), _path(path) {};
     ~JsonStreamer() = default;
 
-    std::optional<Object> fetch(ValueType &search_pattern) noexcept
+    std::optional<Object> fetch(std::string &search_pattern) noexcept
     {
         Object obj;
         Object* obj_ptr;
@@ -107,8 +107,8 @@ public:
 
         boost::property_tree::ptree tree = item.second.get_child("");
         auto key_ptr = _keys.begin();
-        auto parent = tree.get<ValueType>(*key_ptr);
-        ValueType *elem_ptr = get_begin(obj_ptr);
+        auto parent = tree.get<std::string>(*key_ptr);
+        std::string *elem_ptr = get_begin(obj_ptr);
         *elem_ptr = parent;
         elem_ptr++;
         key_ptr++;
@@ -116,7 +116,7 @@ public:
         auto data = tree.get_child("data");
         for ( ;elem_ptr < get_end(obj_ptr) && key_ptr != _keys.end(); elem_ptr++, key_ptr++) {
             auto val = *key_ptr;
-            *elem_ptr = data.get<ValueType>(val);
+            *elem_ptr = data.get<std::string>(val);
         }
 
         return obj;
@@ -136,7 +136,7 @@ public:
         auto index = std::to_string(size);
 
         auto key_ptr = _keys.begin();
-        ValueType* value_ptr = get_begin(&obj);
+        std::string* value_ptr = get_begin(&obj);
         parent.put(*key_ptr, *value_ptr);
         key_ptr++;
         value_ptr++;

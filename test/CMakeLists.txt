@@ -12,7 +12,7 @@ endif()
 
 set(Sources
         ${CMAKE_CURRENT_LIST_DIR}/testmain.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/write.h read.h)
+        ${CMAKE_CURRENT_LIST_DIR}/testcases.h)
 
 add_executable (testapp ${Sources})
 

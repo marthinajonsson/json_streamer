@@ -4,8 +4,7 @@
 #define BOOST_TEST_NO_MAIN
 
 #include <boost/test/unit_test.hpp>
-#include "write.h"
-#include "read.h"
+#include "testcases.h"
 
 // entry point:
 int main(int argc, char* argv[], char* envp[])
