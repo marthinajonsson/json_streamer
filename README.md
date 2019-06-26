@@ -18,15 +18,12 @@ e.g. struct Object { std::string head_value; std::string data; };
 
 path => absolute path to json file to be written and read
 
-<<<<<<< HEAD
 keys => default type is forward_list<std::string>, 
 can be changed but is not tested:<br>
     example: JsonStreamer<Object, int, std::vector<std::string>> streamer(path, keys);
-=======
+
 keys => default type is forward_list<std::string>, can be changed but is not tested:
     example: JsonStreamer<Object, std::vector<std::string>> streamer(path, keys);
->>>>>>> Simplified and merged test cases
-
 
 streamer.write(value) //  => instance of struct<br>
     example: streamer.write(obj) 
